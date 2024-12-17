@@ -20,7 +20,12 @@ public class UserService implements UserDetailsService {
     private final UserDomainDatasourceMapper mapper = UserDomainDatasourceMapper.INSTANCE;
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return mapper.datasourceToDomain(userRepository.findByLogin(username).orElse(null));
+        var userDAO = userRepository.findByLogin(username).orElse(null);
+        if(userDAO == null) {
+            System.out.println("No such user in db");
+            throw new UsernameNotFoundException("No such user");
+        }
+        return mapper.datasourceToDomain(userDAO);
     }
     public List<User> getAll() {
         return mapper.datasourceToDomainList((List<UserDAO>)userRepository.findAll());

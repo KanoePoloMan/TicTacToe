@@ -2,10 +2,11 @@ package s21.web.model;
 
 import java.io.IOException;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.GenericFilterBean;
 
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
@@ -14,15 +15,21 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import s21.domain.service.AuthorizationService;
 
+@Component
 public class AuthFilter extends GenericFilterBean {
-    @Autowired
-    private AuthorizationService authorizationService;
+    @Nonnull
+    private final AuthorizationService authorizationService;
+
+    public AuthFilter(AuthorizationService authorizationService) {
+        this.authorizationService = authorizationService;
+    }
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
                 
-        final String authentication = ((HttpServletRequest) request).getHeader(HttpHeaders.AUTHORIZATION);
+        final HttpServletRequest httpRequest = (HttpServletRequest) request;
+        final String authentication = httpRequest.getHeader(HttpHeaders.AUTHORIZATION);
 
         if(authentication != null && authentication.startsWith("Basic ")) {
             final String rawToken = authentication.replaceAll("^Basic ", "");

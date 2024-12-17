@@ -7,6 +7,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class HtmlController {
     @GetMapping("/test")
     public String getTest() {
-        return "index.html";
+        return "index";
     }
 }

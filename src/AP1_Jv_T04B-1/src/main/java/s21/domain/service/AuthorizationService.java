@@ -4,8 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
@@ -17,35 +16,49 @@ import s21.web.model.SignUpRequest;
 public class AuthorizationService {
     @Autowired
     private UserService userService;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
-    private final PasswordEncoder passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
+    private User user;
 
     public boolean registration(SignUpRequest request) {
-        final UserDetails userDetails = userService.loadUserByUsername(request.login());
-        if(userDetails != null) return false;
+        try {
+            userService.loadUserByUsername(request.username());
+        } catch (UsernameNotFoundException e) {
+            //register
+            User newUser = new User();
+            newUser.setUuid(UUID.randomUUID());
+            newUser.setUsername(request.username());
+            newUser.setPassword(passwordEncoder.encode(request.password()));
 
-        //register
-        User user = new User();
-        user.setUuid(UUID.randomUUID());
-        user.setUsername(request.login());
-        user.setPassword(passwordEncoder.encode(request.password()));
+            userService.saveUser(newUser);
 
-        userService.saveUser(user);
+            System.out.println("registrationSeccess");
 
-        return true;
+            return true;
+        }
+
+        return false;
     }
     public UUID authorization(String loginPassword) {
+        if(user == null) return null;
+        if(validateUser(loginPassword)) return user.getUuid();
+
+        return null;
+    }
+    public boolean validateUser(String loginPassword) {
         final String token = new String(Base64Coder.decode(loginPassword), StandardCharsets.UTF_8);
         final var tokens = token.split(":");
 
-        final String login = new String(Base64Coder.encode(tokens[0].getBytes()));
-        final String password = new String(Base64Coder.encode(tokens[1].getBytes()));
+        final String login = tokens[0];
+        final String password = tokens[1];
 
-        final User user = (User) userService.loadUserByUsername(login);
-        if(user == null) return null;
+        try {
+            user = (User) userService.loadUserByUsername(login);
+        } catch (UsernameNotFoundException e) {
+            return false;
+        }
 
-        if(passwordEncoder.encode(password).equals(user.getPassword())) return user.getUuid();
-
-        return null;
+        return passwordEncoder.matches(password, user.getPassword());
     }
 }

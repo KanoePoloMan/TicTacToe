@@ -26,8 +26,8 @@ dependencies {
     annotationProcessor("org.mapstruct:mapstruct-processor:1.5.5.Final")
     compileOnly("org.projectlombok:lombok:1.18.34")
     annotationProcessor("org.projectlombok:lombok:1.18.34")
-
-    implementation("org.thymeleaf:thymeleaf:3.1.2.RELEASE")
+    
+    implementation("org.springframework.boot:spring-boot-starter-thymeleaf:3.4.0")
 }
 
 tasks.test {

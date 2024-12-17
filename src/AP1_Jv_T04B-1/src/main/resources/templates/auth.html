@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Авторизация</title>
+</head>
+<body>
+    <form id="loginForm">
+        <label for="username">Имя пользователя:</label>
+        <input type="text" id="username" name="username"><br><br>
+        <label for="password">Пароль:</label>
+        <input type="password" id="password" name="password"><br><br>
+        <button type="button" onclick="loginUser()">Войти</button>
+    </form>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        function loginUser() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const credentials = btoa(username + ":" + password);
+            fetch('/auth/authorization', {
+                method: 'POST', // или POST, в зависимости от вашего контроллера
+                headers: {
+                    'Authorization': 'Basic ' + credentials
+                }
+            }).then(response => {
+                if (response.ok) {
+                    // Авторизация успешна, перенаправление на нужную страницу
+                    // window.location.href = '/'; // Замените на нужный URL
+                } else {
+                    alert('Неверный логин или пароль');
+                }
+            }).catch(error => {
+                console.error('Ошибка:', error);
+                alert('Ошибка авторизации');
+            });
+        }
+        /*]]>*/
+    </script>
+</body>
+</html>

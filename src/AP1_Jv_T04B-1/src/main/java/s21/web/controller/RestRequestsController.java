@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.CurrentSecurityContext;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import s21.web.model.CurrentGameDTO;
 import s21.web.model.GameFieldDTO;
+
 
 
 @RestController
@@ -39,6 +42,10 @@ public class RestRequestsController {
     @GetMapping("/game/gamesList")
     public List<String> getMethodName() {
         return controller.getGamesList();
+    }
+    @GetMapping("/anon")
+    public String getMethodName(@CurrentSecurityContext SecurityContext context) {
+        return context.getAuthentication().getName();
     }
     
 }
