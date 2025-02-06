@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import s21.web.controller.DomainController;
-import s21.web.model.CurrentGameAIDTO;
 import s21.web.model.CurrentGameDTO;
 
 @RestController

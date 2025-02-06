@@ -33,6 +33,13 @@ let backendGameMultiplayer = {
   state: null,
   error: null
 };
+let changedField = {
+  gameField: [
+    [0, 0, 0],
+    [0, 0, 0],
+    [0, 0, 0]
+  ]
+};
 
 const getGameURL = 'http://localhost:8081/game/multiplayer/';
 let updateGameURL = 'http://localhost:8081/game/multiplayer/';
@@ -191,4 +198,16 @@ function renderGameBoard() {
     }
   }
   gameInfo.innerHTML = 'Вы играете с ИИ за ' + currentPlayer;
+}
+async function sendChangesRequest() {
+  let response = await fetch(getGameURL + gameUUID + "/changes");
+  changedField = null;
+  changedField = await response.json();
+  
+  if(changedField != null) {
+      console.log(changedField);
+
+      backendGameMultiplayer.field.gameField = changedField.gameField;
+      canStep = true;
+  }
 }
