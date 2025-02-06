@@ -1,3 +1,7 @@
+const uuidElement = document.getElementById('UUID');
+const gameUUID = uuidElement.dataset.myVariable;
+console.log(gameUUID);
+
 const gameBoard = [
   ['', '', ''],
   ['', '', ''],
@@ -10,23 +14,28 @@ let winningLine = [];
 
 const gameContainer = document.getElementById('game-container');
 const gameResult = document.getElementById('game-result'); // Получаем элемент для отображения результата
+const gameInfo = document.getElementById('game-info'); // Получаем элемент для отображения информации об игре
 
-let backendGame = {
+let backendGameAI = {
   uuid: null,
-  gameField: {
+  player: null,
+  x: false,
+  field: {
     gameField: [
       [0, 0, 0],
       [0, 0, 0],
       [0, 0, 0]
     ]
   },
+  state: null,
   error: null
 };
 
-const newGameURL = 'http://localhost:8080/game/newGame';
-let updateGameURL = 'http://localhost:8080/game/';
+const getGameURL = 'http://localhost:8081/game/ai/';
+let updateGameURL = 'http://localhost:8081/game/ai/';
 
 function createGameBoard() {
+  console.log("Create game board");
   for (let i = 0; i < 3; i++) {
     const row = document.createElement('div');
     row.classList.add('row');
@@ -40,8 +49,8 @@ function createGameBoard() {
     }
     gameContainer.appendChild(row);
   }
-  getNewGame();
-  if(backendGame.error != null) alert(backendGame.error);
+  getGame();
+  if(backendGameAI.error != null) alert(backendGameAI.error);
 }
 
 async function handleCellClick(event) {
@@ -54,7 +63,7 @@ async function handleCellClick(event) {
 
   gameBoard[row][col] = currentPlayer;
   event.target.textContent = currentPlayer;
-  backendGame.gameField.gameField[row][col] = currentPlayer === 'X' ? 2 : 1;
+  backendGameAI.field.gameField[row][col] = currentPlayer === 'X' ? 2 : 1;
   await updateGame();
   renderGameBoard();
 
@@ -137,42 +146,43 @@ themeSwitch.addEventListener('click', () => {
   document.getElementById('game-result').classList.toggle('dark');
 });
 
-async function getNewGame() {
-  if(backendGame.uuid == null) {
-    let response = await fetch(newGameURL);
-    backendGame = await response.json();
-    console.log(backendGame);
+async function getGame() {
+    console.log("Get game");
+    let response = await fetch(getGameURL + gameUUID);
+    backendGameAI = await response.json();
+    console.log(backendGameAI);
 
+    currentPlayer = backendGameAI.x ? 'X' : 'O';
     renderGameBoard();
-  }
 }
 async function updateGame() {
-  if(backendGame.error == null) {
-    let response = await fetch(updateGameURL + backendGame.uuid, {
+  if(backendGameAI.error == null) {
+    let response = await fetch(updateGameURL + backendGameAI.uuid, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json;charset=utf-8'
       },
-      body: JSON.stringify(backendGame.gameField)
+      body: JSON.stringify(backendGameAI)
     });
-    console.log("Sended: " + JSON.stringify(backendGame.gameField));
-    backendGame = await response.json();
-    console.log(backendGame);
+    console.log("Sended: " + JSON.stringify(backendGameAI.field));
+    backendGameAI = await response.json();
+    console.log(backendGameAI);
   } else {
-    alert(backendGame.error);
+    alert(backendGameAI.error);
   }
 }
 function renderGameBoard() {
   for(let row = 0; row < 3; row++) {
     for(let col = 0; col < 3; col++) {
       const cell = gameContainer.querySelectorAll('.cell')[row * 3 + col];
-      if(backendGame.gameField.gameField[row][col] == 1) {
+      if(backendGameAI.field.gameField[row][col] == 1) {
         gameBoard[row][col] = 'O';
         cell.textContent = 'O';
-      } else if(backendGame.gameField.gameField[row][col] == 2) {
+      } else if(backendGameAI.field.gameField[row][col] == 2) {
         gameBoard[row][col] = 'X';
         cell.textContent = 'X';
       }
     }
   }
+  gameInfo.innerHTML = 'Вы играете с ИИ за ' + currentPlayer;
 }

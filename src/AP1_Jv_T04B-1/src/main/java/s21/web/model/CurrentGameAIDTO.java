@@ -10,11 +10,11 @@ import s21.domain.model.GameState;
 @Getter
 @Setter
 @AllArgsConstructor
-public class CurrentGameDTO {
+public class CurrentGameAIDTO {
     private UUID uuid;
-    private String X;
-    private String O;
-    private GameFieldDTO gameField;
-    private GameState gameState;
+    private String player;
+    private boolean x;
+    private GameFieldDTO field;
+    private GameState state;
     private String error;
 }

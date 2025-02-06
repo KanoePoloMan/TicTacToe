@@ -11,26 +11,30 @@ import org.springframework.stereotype.Service;
 import s21.datasource.mapper.UserDomainDatasourceMapper;
 import s21.datasource.model.UserDAO;
 import s21.datasource.repository.UserRepository;
+import s21.domain.mapper.UserDatasourceDomainMapper;
 import s21.domain.model.User;
 
 @Service
 public class UserService implements UserDetailsService {
     @Autowired
     private UserRepository userRepository;
-    private final UserDomainDatasourceMapper mapper = UserDomainDatasourceMapper.INSTANCE;
+
+    private final UserDatasourceDomainMapper toDomainMapper = UserDatasourceDomainMapper.INSTANCE;
+    private final UserDomainDatasourceMapper toDatasourceMapper = UserDomainDatasourceMapper.INSTANCE;
+    
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         var userDAO = userRepository.findByLogin(username).orElse(null);
+        System.out.println("UserDAO: " + userDAO);
         if(userDAO == null) {
-            System.out.println("No such user in db");
-            throw new UsernameNotFoundException("No such user");
+            throw new UsernameNotFoundException("No such user: " + username);
         }
-        return mapper.datasourceToDomain(userDAO);
+        return toDomainMapper.datasourceToDomain(userDAO);
     }
     public List<User> getAll() {
-        return mapper.datasourceToDomainList((List<UserDAO>)userRepository.findAll());
+        return toDomainMapper.datasourceToDomainList((List<UserDAO>)userRepository.findAll());
     }
     public void saveUser(User user) {
-        userRepository.save(mapper.domainToDatasource(user));
+        userRepository.save(toDatasourceMapper.domainToDatasource(user));
     }
 }

@@ -121,12 +121,14 @@
     <h1>Крестики-нолики</h1>
     <div id="game-container"></div>
     <div id="game-result"></div>
+    <div id="game-info"></div>
   </div>
 
   <label for="theme-switch">
     <input type="checkbox" id="theme-switch">
   </label>
-
-  <script src="script.js"></script>
+  <div id="UUID" th:data-my-variable="${pathUUID}"></div>
+  <div id="login" th:data-my-login="${myLogin}"></div>
+  <script src="/scripts/gamemultiplayer.js"></script>
 </body>
 </html>

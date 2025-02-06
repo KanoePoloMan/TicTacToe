@@ -1,31 +1,28 @@
 package s21.datasource.model;
 
+import java.util.UUID;
+
 import org.springframework.stereotype.Component;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
+@AllArgsConstructor
 @NoArgsConstructor
 @Component
+@Table(name="users")
 @Entity
-@Table(name = "userdao")
 public class UserDAO {
     @Id
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
-    private int id;
-    private String uuid;
+    private UUID uuid;
+    @Column(length=30)
     private String login;
+    @Column(length=128)
     private String password;
-
-    public UserDAO(String uuid, String login, String password) {
-        this.uuid = uuid;
-        this.login = login;
-        this.password = password;
-    }
 }

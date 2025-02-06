@@ -12,17 +12,17 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Getter
 @Component
+@Getter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name="games_multiplayer")
+@Table(name="games_ai")
 @Entity
-public class CurrentGameDAO {
+public class CurrentGameAIDAO {
     @Id
     private UUID uuid;
-    private UUID x;
-    private UUID o;
+    private UUID player;
+    private boolean x;
     @Column(length=10)
     private String field;
     @Column(length=20)

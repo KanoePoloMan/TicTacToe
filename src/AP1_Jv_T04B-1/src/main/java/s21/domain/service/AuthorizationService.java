@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -22,9 +23,11 @@ public class AuthorizationService {
     private User user;
 
     public boolean registration(SignUpRequest request) {
+        System.out.println("Custom registration func");
         try {
             userService.loadUserByUsername(request.username());
         } catch (UsernameNotFoundException e) {
+            System.out.println("Custom registration");
             //register
             User newUser = new User();
             newUser.setUuid(UUID.randomUUID());
@@ -33,7 +36,7 @@ public class AuthorizationService {
 
             userService.saveUser(newUser);
 
-            System.out.println("registrationSeccess");
+            System.out.println("registrationSuccess");
 
             return true;
         }
@@ -41,10 +44,8 @@ public class AuthorizationService {
         return false;
     }
     public UUID authorization(String loginPassword) {
-        if(user == null) return null;
         if(validateUser(loginPassword)) return user.getUuid();
-
-        return null;
+        else throw new BadCredentialsException("Bad password");
     }
     public boolean validateUser(String loginPassword) {
         final String token = new String(Base64Coder.decode(loginPassword), StandardCharsets.UTF_8);
@@ -60,5 +61,9 @@ public class AuthorizationService {
         }
 
         return passwordEncoder.matches(password, user.getPassword());
+    }
+    public String getCurrentUser() {
+        if(user == null) return "unknown";
+        return user.getUsername();
     }
 }
