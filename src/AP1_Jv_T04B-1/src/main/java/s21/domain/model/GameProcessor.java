@@ -94,8 +94,23 @@ public class GameProcessor implements GameService {
         if(game == null) return null;
         return game.getUuid();
     }
-    public void updateGame(CurrentGame game) {
+    public CurrentGame updateGame(CurrentGame game) throws Exception {
+        checkFieldChanges(game.getUuid(), game.getGameField().getGameField());
+
+        GameState state = game.getGameState();
+        if(state == GameState.DRAW || state == GameState.WIN_O || state == GameState.WIN_X)
+            throw new GameEndException(game, "Game ended with: " + state.name());
+
+        GameField field = game.getGameField();
+        if(getNothingCells(field.getGameField()).isEmpty()) game.setGameState(GameState.DRAW);
+        else if(checkGameEnd(field.getGameField(), CROSS_CODE)) game.setGameState(GameState.WIN_X);
+        else if(checkGameEnd(field.getGameField(), ZERO_CODE)) game.setGameState(GameState.WIN_O);
+        else if(isCurrentStepX(field)) game.setGameState(GameState.STEP_X);
+        else game.setGameState(GameState.STEP_O);
+
         repository.updateGameMultiplayer(toDatasourceMapper.domainToDatasource(game));
+
+        return game;
     }
     public void updateGame(CurrentGameAI game) {
         repository.updateGameAI(toDatasourceMapperAI.domainToDatasource(game));
@@ -131,18 +146,20 @@ public class GameProcessor implements GameService {
         return X == O;
     }
     @Override
-    public int[][] nextStep(CurrentGame game) throws Exception {
-        if(gameIsEnded(game)) throw new GameEndException(game, "Game ended");
-        if(!fieldValidationIsOk(game)) throw new InvalidFieldException(game, "Invalid field");
-
-        return calculateNextStep(game.getGameField(), isCurrentStepX(game.getGameField()));
-    }
-    @Override
-    public int[][] nextStep(CurrentGameAI game) throws Exception {
-        if(gameIsEnded(game)) throw new AIGameEndException(game, "Game ended");
+    public CurrentGameAI nextStep(CurrentGameAI game) throws Exception {
         if(!fieldValidationIsOk(game)) throw new InvalidAIFieldException(game, "Invalid field");
 
-        return calculateNextStep(game.getField(), game.isX());
+        GameState state = game.getGameState();
+        if(state == GameState.DRAW || state == GameState.WIN_O || state == GameState.WIN_X)
+            throw new AIGameEndException(game, "Game ended");
+
+        GameField field = game.getField();
+        if(getNothingCells(field.getGameField()).isEmpty()) game.setGameState(GameState.DRAW);
+        else if(checkGameEnd(field.getGameField(), CROSS_CODE)) game.setGameState(GameState.WIN_X);
+        else if(checkGameEnd(field.getGameField(), ZERO_CODE)) game.setGameState(GameState.WIN_O);
+        else game.setField(new GameField(calculateNextStep(game.getField(), game.isX())));
+
+        return game;
     }
 
     private int[][] calculateNextStep(GameField field, boolean isX) {
@@ -193,11 +210,11 @@ public class GameProcessor implements GameService {
     }
     @Override
     public boolean gameIsEnded(CurrentGame game) {
-        return gameIsEnded(game.getGameField().getGameField()) != NOTHING_CODE;
+        return gameIsEnded(game.getGameField().getGameField());
     }
     @Override
     public boolean gameIsEnded(CurrentGameAI game) {
-        return gameIsEnded(game.getField().getGameField()) != NOTHING_CODE;
+        return gameIsEnded(game.getField().getGameField());
     }
 
     private boolean checkGameEnd(int[][] field, int code) {
@@ -218,7 +235,6 @@ public class GameProcessor implements GameService {
         return right || left; 
     }
 
-
     private List<int[]> getNothingCells(int[][] cur) {
         List<int[]> result = new ArrayList<>();
         for(int i = 0; i < 3; i++)
@@ -227,42 +243,41 @@ public class GameProcessor implements GameService {
                     result.add(new int[]{i, j});
         return result;
     }
-        private Map.Entry<Integer, int[]> minimax(int[][] field, boolean isMax) {
-        if(gameIsEnded(field) != NOTHING_CODE) return new AbstractMap.SimpleEntry<>(evaluateGame(field, isMax), null);
+    private Map.Entry<Integer, int[]> minimax(int[][] field, boolean isX) {
+        if(gameIsEnded(field)) return new AbstractMap.SimpleEntry<>(evaluateGame(field, isX), null);
 
         int[] bestMove = new int[2];
         int bestValue;
         int symbol;
 
-        if(isMax) {
+        if(isX) {
             bestValue = Integer.MIN_VALUE;
-            symbol = ZERO_CODE;
+            symbol = CROSS_CODE;
         } else {
             bestValue = Integer.MAX_VALUE;
-            symbol = CROSS_CODE;
+            symbol = ZERO_CODE;
         }
         for(int[] move : getNothingCells(field)) {
             int[][] newField = Arrays.stream(field).map(int[]::clone).toArray(int[][]::new);
 
             newField[move[0]][move[1]] = symbol;
 
-            int hypothetical_value = minimax(newField, !isMax).getKey();
-            if(isMax && hypothetical_value > bestValue) {
+            int hypothetical_value = minimax(newField, !isX).getKey();
+            if(isX && hypothetical_value > bestValue) {
                 bestValue = hypothetical_value;
                 bestMove = new int[]{move[0], move[1]};
             } 
-            if(!isMax && hypothetical_value < bestValue) {
+            if(!isX && hypothetical_value < bestValue) {
                 bestValue = hypothetical_value;
                 bestMove = new int[]{move[0], move[1]};
             }
         }
         return new AbstractMap.SimpleEntry<>(bestValue, bestMove);
     }
-    public int gameIsEnded(int [][] field) {
-        if(checkGameEnd(field, ZERO_CODE)) return ZERO_CODE;
-        else if(checkGameEnd(field, CROSS_CODE)) return CROSS_CODE;
-        else if(getNothingCells(field).isEmpty()) return DRAW;
-        else return NOTHING_CODE;
+    public boolean gameIsEnded(int [][] field) {
+        return checkGameEnd(field, ZERO_CODE) 
+            || checkGameEnd(field, CROSS_CODE) 
+            || getNothingCells(field).isEmpty();
     }
     private int evaluateGame(int [][] field, boolean isX) {
         if(checkGameEnd(field, ZERO_CODE)) return isX ? -1 : 1;
@@ -274,5 +289,17 @@ public class GameProcessor implements GameService {
     }
     public CurrentGame getGameByUUID(UUID uuid) {
         return toDomainMapper.datasourceToDomain(repository.getPlayerGameByUUID(uuid));
+    }
+    public CurrentGame checkFieldChanges(UUID uuid, int[][] field) throws Exception {
+        CurrentGame game = toDomainMapper.datasourceToDomain(repository.getPlayerGameByUUID(uuid));
+
+        int changesCount = 0;
+        for(int i = 0; i < 3; i++) {
+            for(int j = 0; j < 3; j++) {
+                if(game.getGameField().getGameField()[i][j] != field[i][j]) changesCount++;
+            }
+        }
+        if(changesCount > 1) throw new InvalidFieldException(game, "Bad field in multiplayer");
+        return game;
     }
 }

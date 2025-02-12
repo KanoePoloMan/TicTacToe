@@ -24,9 +24,14 @@ public class MultiplayerGameController {
         return "/finding.html";
     }
     @GetMapping("{UUID}")
-    public String getMultiplayerGame(Model model, @PathVariable("UUID") String uuid) throws Exception {
+    public String getMultiplayerGame(Model model, 
+                                    @PathVariable("UUID") String uuid, 
+                                    @CurrentSecurityContext SecurityContext context) throws Exception {
 
         model.addAttribute("pathUUID", uuid);
+        model.addAttribute("myLogin", controller.getPlayerUUID(
+                                                                    context.getAuthentication().getName())
+                                                              .toString());
 
         return "gamemultiplayer.html";
     }

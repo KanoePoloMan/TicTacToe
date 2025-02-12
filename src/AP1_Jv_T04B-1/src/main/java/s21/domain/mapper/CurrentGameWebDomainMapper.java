@@ -18,7 +18,7 @@ public interface CurrentGameWebDomainMapper {
                     web.getUuid(),
                     UUID.fromString(web.getX()),
                     UUID.fromString(web.getO()),
-                    new GameField(web.getGameField().gameField()),
+                    new GameField(web.getField().gameField()),
                     web.getGameState());
     }
 }

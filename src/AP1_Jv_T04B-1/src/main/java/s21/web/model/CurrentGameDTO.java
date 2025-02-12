@@ -14,7 +14,7 @@ public class CurrentGameDTO {
     private UUID uuid;
     private String X;
     private String O;
-    private GameFieldDTO gameField;
+    private GameFieldDTO field;
     private GameState gameState;
     private String error;
 }

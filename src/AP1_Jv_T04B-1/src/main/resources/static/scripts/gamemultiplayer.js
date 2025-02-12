@@ -1,9 +1,10 @@
 const uuidElement = document.getElementById('UUID');
 const gameUUID = uuidElement.dataset.myVariable;
-const loginElement = document.getElementById('login');
-const myLogin = loginElement.dataset.myLogin;
+const loginElement = document.getElementById('userUUID');
+const userUUID = loginElement.dataset.userUuid;
 
 var canStep = false;
+var fieldGetted = false;
 
 const gameBoard = [
   ['', '', ''],
@@ -30,15 +31,22 @@ let backendGameMultiplayer = {
       [0, 0, 0]
     ]
   },
-  state: null,
+  gameState: null,
   error: null
 };
 let changedField = {
-  gameField: [
-    [0, 0, 0],
-    [0, 0, 0],
-    [0, 0, 0]
-  ]
+  uuid: null,
+  x: null,
+  o: null,
+  field: {
+    gameField: [
+      [0, 0, 0],
+      [0, 0, 0],
+      [0, 0, 0]
+    ]
+  },
+  gameStates: null,
+  error: null
 };
 
 const getGameURL = 'http://localhost:8081/game/multiplayer/';
@@ -79,16 +87,7 @@ async function handleCellClick(event) {
   canStep = false;
   renderGameBoard();
 
-  if (checkWin() != '') {
-    gameOver = true;
-    highlightWinningLine(); // Подсветка победной линии
-    gameResult.innerHTML = `${checkWin()} победил!`; // Выводим результат в gameResult
-  } else if (checkDraw()) {
-    gameOver = true;
-    gameResult.innerHTML = 'Ничья!';
-  } else {
-    // switchPlayer();
-  }
+  gameEndAnalysier();
 }
 
 function checkWin() {
@@ -147,8 +146,6 @@ function highlightWinningLine() {
   });
 }
 
-createGameBoard();
-
 const themeSwitch = document.getElementById('theme-switch');
 
 themeSwitch.addEventListener('click', () => {
@@ -162,9 +159,12 @@ async function getGame() {
     console.log("Get game");
     let response = await fetch(getGameURL + gameUUID + "/get");
     backendGameMultiplayer = await response.json();
+
+    fieldGetted = true;
+
     console.log(backendGameMultiplayer);
 
-    currentPlayer = backendGameMultiplayer.x == myLogin ? 'X' : 'O';
+    currentPlayer = backendGameMultiplayer.x == userUUID ? 'X' : 'O';
     if(currentPlayer == 'X') canStep = true;
     renderGameBoard();
 }
@@ -178,10 +178,31 @@ async function updateGame() {
       body: JSON.stringify(backendGameMultiplayer)
     });
     console.log("Sended: " + JSON.stringify(backendGameMultiplayer.field));
+
     backendGameMultiplayer = await response.json();
-    console.log(backendGameMultiplayer);
+
+    gameEndAnalysier();
+    // console.log(backendGameMultiplayer);
   } else {
     alert(backendGameMultiplayer.error);
+  }
+}
+function gameEndAnalysier() {
+  if (checkWin() != '') {
+    gameOver = true;
+    highlightWinningLine(); // Подсветка победной линии
+
+    if(checkWin() == currentPlayer) {
+      gameResult.innerHTML = 'Вы победили!'
+    } else {
+      gameResult.innerHTML = 'Противник победил!'
+    }
+
+  } else if (checkDraw()) {
+    gameOver = true;
+    gameResult.innerHTML = 'Ничья!';
+  } else {
+    // switchPlayer();
   }
 }
 function renderGameBoard() {
@@ -197,17 +218,47 @@ function renderGameBoard() {
       }
     }
   }
-  gameInfo.innerHTML = 'Вы играете с ИИ за ' + currentPlayer;
+  gameInfo.innerHTML = 'Вы играете с игроком за ' + currentPlayer;
 }
 async function sendChangesRequest() {
-  let response = await fetch(getGameURL + gameUUID + "/changes");
-  changedField = null;
-  changedField = await response.json();
-  
-  if(changedField != null) {
-      console.log(changedField);
+  if(!fieldGetted) return;
+  if(gameOver) return;
+  console.log("Send Changes Request");
 
-      backendGameMultiplayer.field.gameField = changedField.gameField;
-      canStep = true;
+  let response = await fetch(getGameURL + gameUUID + "/changes", {
+    method: 'POST',
+      headers: {
+        'Content-Type': 'application/json;charset=utf-8'
+      },
+      body: JSON.stringify(backendGameMultiplayer)
+  });
+  changedField = await response.json();
+
+  console.log("Changed Field");
+  console.log(changedField);
+  console.log("Backand field");
+  console.log(backendGameMultiplayer);
+  
+  for(let i = 0; i < 3; i++) {
+    for(let j = 0; j < 3; j++) {
+      backendGameMultiplayer.field.gameField[i][j] = changedField.field.gameField[i][j];
+    }
   }
+  backendGameMultiplayer.gameState = changedField.gameState;
+
+  if(backendGameMultiplayer.gameState == 'STEP_X' && currentPlayer == 'X') canStep = true;
+  if(backendGameMultiplayer.gameState == 'STEP_O' && currentPlayer == 'O') canStep = true;
+
+  gameEndAnalysier();
+
+  console.log("Can Step");
+  console.log(canStep);
+
+  renderGameBoard();
 }
+
+createGameBoard();
+
+setInterval(sendChangesRequest, 1000);
+
+console.log(userUUID);

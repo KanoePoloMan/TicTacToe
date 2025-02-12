@@ -23,14 +23,20 @@ public class MultiplayerGameRestController {
     private DomainController controller;
 
     @GetMapping("{UUID}/get")
-    public CurrentGameDTO updateMultiplayerGameField(@PathVariable("UUID") String uuid) {
+    public CurrentGameDTO getMultiplayerGameField(@PathVariable("UUID") String uuid) {
         return controller.getMultiplayerGameByUUID(uuid);
+    }
+    @PostMapping("{UUID}/changes")
+    public CurrentGameDTO getChangingsGameField(
+                            @PathVariable("UUID") String uuid, 
+                            @RequestBody CurrentGameDTO field) throws Exception {
+        return controller.checkFieldChanges(uuid, field.getField());
     }
     @PostMapping("{UUID}")
     public CurrentGameDTO updateMultiplayerGameField(
                                 @PathVariable("UUID") String uuid, 
                                 @RequestBody CurrentGameDTO field) throws Exception {
-        return controller.updateFieldAndGetNextStep(field);
+        return controller.updateMultiplayerField(field);
     }
     
     @GetMapping("list")

@@ -13,8 +13,6 @@ import s21.domain.service.AuthorizationService;
 public class GameController {
     @Autowired
     private AuthorizationService authorizationService;
-    @Autowired
-    private DomainController controller;
     
     @GetMapping("/test")
     public String getTest() {

@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 import s21.domain.mapper.CurrentGameAIWebDomainMapper;
 import s21.domain.mapper.CurrentGameWebDomainMapper;
 import s21.domain.model.GameProcessor;
-import s21.domain.model.GameState;
 import s21.web.mapper.CurrentGameAIDomainWebMapper;
 import s21.web.mapper.CurrentGameDomainWebMapper;
 import s21.web.model.CurrentGameAIDTO;
@@ -34,14 +33,14 @@ public class DomainController {
         return toWebMapperAI.domainToWeb(logic.createGameWithAI(nickname));
     }
     public CurrentGameAIDTO updateFieldAndGetNextStep(CurrentGameAIDTO newField) throws Exception {
-        checkGameStateAI(newField);
-        newField.setField(new GameFieldDTO(logic.nextStep(toDomainMapperAI.webToDomain(newField))));
-        logic.updateGame(toDomainMapperAI.webToDomain(newField));
-        return newField;
+        CurrentGameAIDTO game = toWebMapperAI.domainToWeb(logic.nextStep(toDomainMapperAI.webToDomain(newField)));
+
+        logic.updateGame(toDomainMapperAI.webToDomain(game));
+
+        return game;
     }
     public CurrentGameDTO updateMultiplayerField(CurrentGameDTO newField) throws Exception {
-        logic.updateGame(toDomainMapper.webToDomain(newField));
-        return newField;
+        return toWebMapper.domainToWeb(logic.updateGame(toDomainMapper.webToDomain(newField)));
     }
     public List<String> getGames() {
         return logic.getAllGames();
@@ -57,18 +56,16 @@ public class DomainController {
         if(game.isX()) return game;
         else return updateFieldAndGetNextStep(game);
     }
-    private void checkGameStateAI(CurrentGameAIDTO newField) {
-        switch(logic.gameIsEnded(newField.getField().gameField())) {
-            case GameProcessor.NOTHING_CODE -> {return;}
-            case GameProcessor.CROSS_CODE -> newField.setState(GameState.WIN_X);
-            case GameProcessor.ZERO_CODE -> newField.setState(GameState.WIN_O);
-            case GameProcessor.DRAW -> newField.setState(GameState.DRAW);
-        }
-    }
     public UUID checkInFoundedList(String nickname) {
         return logic.checkInFoundedList(nickname);
     }
     public CurrentGameDTO getMultiplayerGameByUUID(String uuid) {
         return toWebMapper.domainToWeb(logic.getMultiplayerGameByUUID(UUID.fromString(uuid)));
+    }
+    public CurrentGameDTO checkFieldChanges(String uuid, GameFieldDTO field) throws Exception {
+        return toWebMapper.domainToWeb(logic.checkFieldChanges(UUID.fromString(uuid), field.gameField()));
+    }
+    public UUID getPlayerUUID(String login) {
+        return logic.getPlayerUuidByName(login);
     }
 }
