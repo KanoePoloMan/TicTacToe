@@ -46,3 +46,5 @@ bin/
 
 s21/test/
 tictactoe.session.sql
+.devcontainer/
+.github/
