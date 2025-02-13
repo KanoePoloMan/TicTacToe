@@ -1,5 +1,7 @@
 package s21.web.mapper;
 
+import java.util.List;
+
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
@@ -20,5 +22,9 @@ public interface CurrentGameDomainWebMapper {
                         new GameFieldDTO(domain.getGameField().getGameField()),
                         domain.getGameState(),
                         null);
+    }
+    default List<CurrentGameDTO> domainToWeb(List<CurrentGame> domain) {
+        if(domain == null) return null;
+        return domain.stream().map(this::domainToWeb).toList();
     }
 }

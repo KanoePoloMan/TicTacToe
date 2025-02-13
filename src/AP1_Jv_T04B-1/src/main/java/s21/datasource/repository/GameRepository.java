@@ -11,7 +11,9 @@ import s21.datasource.model.CurrentGameDAO;
 
 public interface GameRepository extends CrudRepository<CurrentGameDAO, UUID> {
     Optional<CurrentGameDAO> findByUuid(UUID uuid);
-    Optional<CurrentGameDAO> findByState(String ended);
+    // Optional<CurrentGameDAO> findByState(String ended);
+
+    List<CurrentGameDAO> findByState(String ended);
 
     List<CurrentGameDAO> findByX(UUID login);
     List<CurrentGameDAO> findByO(UUID login);

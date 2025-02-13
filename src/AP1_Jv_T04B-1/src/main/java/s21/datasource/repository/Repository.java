@@ -25,10 +25,14 @@ public class Repository {
     @Autowired
     private FoundedGamesRepository foundedGamesRepository;
 
-    public CurrentGameDAO getBlankGames() {
-        return gameRepository.findByState(GameState.WAITING_PLAYERS.name()).orElse(null);
-    }
+    // public CurrentGameDAO getBlankGames() {
+    //     return gameRepository.findByState(GameState.WAITING_PLAYERS.name()).orElse(null);
+    // }
     public void saveNewGamePlayer(CurrentGameDAO game) {
+        gameRepository.save(game);
+    }
+    public void replaceGamePlayer(CurrentGameDAO game) {
+        gameRepository.deleteById(game.getUuid());
         gameRepository.save(game);
     }
     public void saveNewGameAI(CurrentGameAIDAO game) {
@@ -67,6 +71,9 @@ public class Repository {
     public UserDAO getUserByName(String name) {
         return userRepository.findByLogin(name).orElse(null);
     }
+    public UserDAO getUserByUUID(UUID uuid) {
+        return userRepository.findById(uuid).orElse(null);
+    }
     public CurrentGameDAO getPlayerGameByUUID(UUID uuid) {
         return gameRepository.findByUuid(uuid).get();
     }
@@ -87,5 +94,8 @@ public class Repository {
     }
     public CurrentGameDAO checkInFoundedRepository(UUID player) {
         return foundedGamesRepository.checkInList(player);
+    }
+    public List<CurrentGameDAO> getAvailableGames() {
+        return gameRepository.findByState(GameState.WAITING_PLAYERS.name());
     }
 }

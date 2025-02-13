@@ -68,10 +68,16 @@ public class DomainController {
     public UUID getPlayerUUID(String login) {
         return logic.getPlayerUuidByName(login);
     }
+    public String getPlayerLogin(UUID uuid) {
+        return logic.getPlayerLoginByUUID(uuid);
+    }
     public CurrentGameDTO createMultiplayerGame(String nickname) {
         return toWebMapper.domainToWeb(logic.createMultiplayerGame(nickname));
     }
     public List<CurrentGameDTO> getAvailableGames() {
-        
+        return toWebMapper.domainToWeb(logic.getAvailableGames());
+    }
+    public void connectToGame(String uuid, String nickname) {
+        logic.connectToGame(UUID.fromString(uuid), nickname);
     }
 }

@@ -38,6 +38,11 @@ public class MultiplayerGameRestController {
                                 @RequestBody CurrentGameDTO field) throws Exception {
         return controller.updateMultiplayerField(field);
     }
+    @PostMapping("getNameByUUID")
+    public String getNameByUUID(@RequestBody String uuid) {
+        System.out.println(uuid);
+        return controller.getPlayerLogin(UUID.fromString(uuid.replaceAll("\"", "")));
+    }
     
     @GetMapping("list")
     public List<String> getMultiplayerGames() {

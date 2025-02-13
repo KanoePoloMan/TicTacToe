@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import s21.web.model.CurrentGameDTO;
 
+
 @Controller
 @RequestMapping("/game/multiplayer")
 public class MultiplayerGameController {
@@ -34,7 +35,6 @@ public class MultiplayerGameController {
 
         return "gamemultiplayer.html";
     }
-    //TODO 
     @GetMapping("createGame")
     public String getCreateMultiplayerGame(Model model, @CurrentSecurityContext SecurityContext context) {
         CurrentGameDTO game = controller.createMultiplayerGame(context.getAuthentication().getName());
@@ -45,9 +45,21 @@ public class MultiplayerGameController {
 
         return "gamemultiplayer.html";
     }
-    //TODO
     @GetMapping("availableGames")
     public String getAvailableGames() {
         return "availablegames.html";
     }
+    @GetMapping("{UUID}/connectToGame")
+    public String getConnectToGame(Model model, 
+                                  @PathVariable("UUID") String uuid, 
+                                  @CurrentSecurityContext SecurityContext context) {
+        controller.connectToGame(uuid.replaceAll("\"", ""), context.getAuthentication().getName());
+
+        model.addAttribute("pathUUID", uuid.replaceAll("\"", ""));
+        model.addAttribute("myLogin", 
+                            controller.getPlayerUUID(context.getAuthentication().getName()).toString());
+        
+        return "gamemultiplayer.html";
+    }
+    
 }

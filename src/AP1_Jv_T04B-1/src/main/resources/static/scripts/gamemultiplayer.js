@@ -245,6 +245,7 @@ async function sendChangesRequest() {
     }
   }
   backendGameMultiplayer.gameState = changedField.gameState;
+  backendGameMultiplayer.o = changedField.o;
 
   if(backendGameMultiplayer.gameState == 'STEP_X' && currentPlayer == 'X') canStep = true;
   if(backendGameMultiplayer.gameState == 'STEP_O' && currentPlayer == 'O') canStep = true;

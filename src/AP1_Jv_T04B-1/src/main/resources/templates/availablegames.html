@@ -50,61 +50,7 @@
 
 <button id="backButton">Вернуться в Меню</button>
 
-<script>
-  // Данные для списка (можно заменить на ваши данные)
-  const listData = [
-    "Элемент 1",
-    "Элемент 2",
-    "Элемент 3",
-    "Элемент 4",
-    "Элемент 5",
-    "Элемент 6",
-    "Элемент 7",
-    "Элемент 8",
-    "Элемент 9",
-    "Элемент 10",
-    "Элемент 11",
-    "Элемент 12",
-    "Элемент 13",
-    "Элемент 14",
-    "Элемент 15"
-  ];
-
-  // Количество элементов списка (можно изменить)
-  const numberOfItems = listData.length;
-
-  // Получаем элемент списка по его ID
-  const scrollableList = document.getElementById("scrollableList");
-
-  // Получаем кнопку "Вернуться в Меню" по ее ID
-  const backButton = document.getElementById("backButton");
-
-  // Функция для создания кнопки
-  function createListItemButton(text) {
-    const button = document.createElement("button");
-    button.classList.add("listItemButton"); // Добавляем класс для стилизации
-    button.textContent = text;
-    button.addEventListener("click", onButtonClick);
-    return button;
-  }
-
-
-  // Создаем и добавляем кнопки в список
-  for (let i = 0; i < numberOfItems; i++) {
-    const button = createListItemButton(listData[i]);
-    scrollableList.appendChild(button);
-  }
-  function onButtonClick() {
-    alert("Вы нажали на кнопку: " + text); // Пример обработки нажатия
-  }
-
-  // Обработчик события для кнопки "Вернуться в Меню"
-  backButton.addEventListener("click", function() {
-    // Здесь добавьте код для возврата в меню.
-    // Например, можно перенаправить пользователя на другую страницу:
-    location.href = "http://localhost:8081/menu";
-  });
-</script>
+<script src="/scripts/availablegames.js"></script>
 
 </body>
 </html>

@@ -80,6 +80,12 @@ public class GameProcessor implements GameService {
 
         return newGame;
     }
+    public void connectToGame(UUID uuid, String nickname) {
+        CurrentGame game = toDomainMapper.datasourceToDomain(repository.getPlayerGameByUUID(uuid));
+        game.setO(repository.getUserUUIDbyLogin(nickname));
+        game.setGameState(GameState.STEP_X);
+        repository.replaceGamePlayer(toDatasourceMapper.domainToDatasource(game));
+    }
     public CurrentGame getMultiplayerGameByUUID(UUID uuid) {
         return toDomainMapper.datasourceToDomain(repository.getPlayerGameByUUID(uuid));
     }
@@ -98,6 +104,11 @@ public class GameProcessor implements GameService {
         User user = userMapper.datasourceToDomain(repository.getUserByName(name));
         if(user == null) return null;
         return user.getUuid();
+    }
+    public String getPlayerLoginByUUID(UUID uuid) {
+        User user = userMapper.datasourceToDomain(repository.getUserByUUID(uuid));
+        if(user == null) return null;
+        return user.getUsername();
     }
     public UUID checkInFoundedList(String nickname) {
         CurrentGame game = toDomainMapper.datasourceToDomain(
@@ -277,5 +288,8 @@ public class GameProcessor implements GameService {
         }
         if(changesCount > 1) throw new InvalidFieldException(game, "Bad field in multiplayer");
         return game;
+    }
+    public List<CurrentGame> getAvailableGames() {
+        return toDomainMapper.datasourceToDomain(repository.getAvailableGames());
     }
 }

@@ -1,5 +1,7 @@
 package s21.domain.mapper;
 
+import java.util.List;
+
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
@@ -17,8 +19,12 @@ public interface CurrentGameDatasourceDomainMapper {
         return new CurrentGame(
                     datasource.getUuid(), 
                     datasource.getX(),
-                    datasource.getO(),
+                    datasource.getO() == null ? null : datasource.getO(),
                     gameFieldToDomain.datasourceToDomain(datasource.getField()),
                     GameState.valueOf(datasource.getState()));
+    }
+    default List<CurrentGame> datasourceToDomain(List<CurrentGameDAO> datasource) {
+        if(datasource == null) return null;
+        return datasource.stream().map(this::datasourceToDomain).toList();
     }
 }

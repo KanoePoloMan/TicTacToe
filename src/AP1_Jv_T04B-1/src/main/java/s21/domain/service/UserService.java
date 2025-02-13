@@ -1,6 +1,7 @@
 package s21.domain.service;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -36,5 +37,8 @@ public class UserService implements UserDetailsService {
     }
     public void saveUser(User user) {
         userRepository.save(toDatasourceMapper.domainToDatasource(user));
+    }
+    public User getUserByUUID(UUID uuid) {
+        return toDomainMapper.datasourceToDomain(userRepository.findById(uuid).orElse(null));
     }
 }
