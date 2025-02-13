@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Доступные игры</title>
+<style>
+  #scrollableList {
+    width: 200px;
+    height: 300px;
+    overflow-y: scroll;
+    border: 1px solid #ccc;
+    padding: 5px;
+  }
+
+  .listItemButton {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 5px;
+    background-color: #f0f0f0;
+    border: 1px solid #ddd;
+    cursor: pointer;
+    text-align: left;
+    border-radius: 4px;
+  }
+
+  .listItemButton:hover {
+    background-color: #e0e0e0;
+  }
+  #backButton {
+    margin-top: 10px;
+    padding: 8px 16px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+
+  #backButton:hover {
+    background-color: #367C39;
+  }
+</style>
+</head>
+<body>
+
+<h1>Доступные игры</h1>
+
+<div id="scrollableList">
+  <!-- Кнопки будут добавлены сюда скриптом -->
+</div>
+
+<button id="backButton">Вернуться в Меню</button>
+
+<script>
+  // Данные для списка (можно заменить на ваши данные)
+  const listData = [
+    "Элемент 1",
+    "Элемент 2",
+    "Элемент 3",
+    "Элемент 4",
+    "Элемент 5",
+    "Элемент 6",
+    "Элемент 7",
+    "Элемент 8",
+    "Элемент 9",
+    "Элемент 10",
+    "Элемент 11",
+    "Элемент 12",
+    "Элемент 13",
+    "Элемент 14",
+    "Элемент 15"
+  ];
+
+  // Количество элементов списка (можно изменить)
+  const numberOfItems = listData.length;
+
+  // Получаем элемент списка по его ID
+  const scrollableList = document.getElementById("scrollableList");
+
+  // Получаем кнопку "Вернуться в Меню" по ее ID
+  const backButton = document.getElementById("backButton");
+
+  // Функция для создания кнопки
+  function createListItemButton(text) {
+    const button = document.createElement("button");
+    button.classList.add("listItemButton"); // Добавляем класс для стилизации
+    button.textContent = text;
+    button.addEventListener("click", onButtonClick);
+    return button;
+  }
+
+
+  // Создаем и добавляем кнопки в список
+  for (let i = 0; i < numberOfItems; i++) {
+    const button = createListItemButton(listData[i]);
+    scrollableList.appendChild(button);
+  }
+  function onButtonClick() {
+    alert("Вы нажали на кнопку: " + text); // Пример обработки нажатия
+  }
+
+  // Обработчик события для кнопки "Вернуться в Меню"
+  backButton.addEventListener("click", function() {
+    // Здесь добавьте код для возврата в меню.
+    // Например, можно перенаправить пользователя на другую страницу:
+    location.href = "http://localhost:8081/menu";
+  });
+</script>
+
+</body>
+</html>

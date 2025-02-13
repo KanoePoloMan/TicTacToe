@@ -29,10 +29,25 @@ public class MultiplayerGameController {
                                     @CurrentSecurityContext SecurityContext context) throws Exception {
 
         model.addAttribute("pathUUID", uuid);
-        model.addAttribute("myLogin", controller.getPlayerUUID(
-                                                                    context.getAuthentication().getName())
-                                                              .toString());
+        model.addAttribute("myLogin", 
+                           controller.getPlayerUUID(context.getAuthentication().getName()).toString());
 
         return "gamemultiplayer.html";
+    }
+    //TODO 
+    @GetMapping("createGame")
+    public String getCreateMultiplayerGame(Model model, @CurrentSecurityContext SecurityContext context) {
+        CurrentGameDTO game = controller.createMultiplayerGame(context.getAuthentication().getName());
+        
+        model.addAttribute("pathUUID", game.getUuid().toString());
+        model.addAttribute("myLogin", 
+                            controller.getPlayerUUID(context.getAuthentication().getName()).toString());
+
+        return "gamemultiplayer.html";
+    }
+    //TODO
+    @GetMapping("availableGames")
+    public String getAvailableGames() {
+        return "availablegames.html";
     }
 }

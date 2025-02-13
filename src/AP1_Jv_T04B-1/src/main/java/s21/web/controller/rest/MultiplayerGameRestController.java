@@ -49,4 +49,8 @@ public class MultiplayerGameRestController {
         if(uuid == null) return null;
         return uuid.toString();
     }
+    @GetMapping("getAvailableGames")
+    public List<CurrentGameDTO> getAvailableGames() {
+        return controller.getAvailableGames();
+    }
 }

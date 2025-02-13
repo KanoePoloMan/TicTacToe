@@ -16,7 +16,7 @@ public interface CurrentGameDomainWebMapper {
         return new CurrentGameDTO(
                         domain.getUuid(), 
                         domain.getX().toString(),
-                        domain.getO().toString(),
+                        domain.getO() == null ? null : domain.getO().toString(),
                         new GameFieldDTO(domain.getGameField().getGameField()),
                         domain.getGameState(),
                         null);

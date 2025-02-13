@@ -49,6 +49,8 @@
 
     <div class="button-container">
         <button onclick="findPlayer()">Найти Игру с Игроком</button>
+        <button onclick="createPlayer()">Создать Игру с Игроком</button>
+        <button onclick="availableGames()">Доступные Игры</button>
         <button onclick="findComputer()">Найти Игру с Компьютером</button>
     </div>
 
@@ -64,6 +66,19 @@
             /*<![CDATA[*/
             location.href = "http://localhost:8081/game/ai/newGame";
             // Здесь можно добавить код для начала игры с компьютером
+            /*]]>*/
+        }
+
+        function createPlayer() {
+            /*<![CDATA[*/
+            location.href = "http://localhost:8081/game/multiplayer/createGame";
+            // Здесь можно добавить код для создания игры с компьютером
+            /*]]>*/
+        }
+        function availableGames() {
+            /*<![CDATA[*/
+            location.href = "http://localhost:8081/game/multiplayer/availableGames";
+            // Здесь можно добавить код для создания игры с компьютером
             /*]]>*/
         }
     </script>

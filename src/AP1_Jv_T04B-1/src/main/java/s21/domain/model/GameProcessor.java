@@ -1,10 +1,8 @@
 package s21.domain.model;
 
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 
@@ -68,6 +66,19 @@ public class GameProcessor implements GameService {
             repository.saveGameInFoundedRepository(searchPlayer, toDatasourceMapper.domainToDatasource(newGame));
             return newGame;
         }
+    }
+    public CurrentGame createMultiplayerGame(String login) {
+        UUID currentPlayer = repository.getUserUUIDbyLogin(login);
+
+        CurrentGame newGame = new CurrentGame(UUID.randomUUID(), 
+                                              currentPlayer,
+                                              null,
+                                              new GameField(),
+                                              GameState.WAITING_PLAYERS);
+
+        repository.saveNewGamePlayer(toDatasourceMapper.domainToDatasource(newGame));
+
+        return newGame;
     }
     public CurrentGame getMultiplayerGameByUUID(UUID uuid) {
         return toDomainMapper.datasourceToDomain(repository.getPlayerGameByUUID(uuid));
@@ -165,7 +176,8 @@ public class GameProcessor implements GameService {
     private int[][] calculateNextStep(GameField field, boolean isX) {
         int[][] returned = Arrays.stream(field.getGameField()).map(int[]::clone).toArray(int[][]::new);
 
-        int[] bestStep = minimax(returned, !isX).getValue();
+        Minimax minimax = new Minimax(isX ? CROSS_CODE : ZERO_CODE, isX ? ZERO_CODE : CROSS_CODE);
+        int[] bestStep = minimax.minimax(returned, true).getValue();
 
         returned[bestStep[0]][bestStep[1]] = !isX == true ? CROSS_CODE : ZERO_CODE;
 
@@ -243,46 +255,10 @@ public class GameProcessor implements GameService {
                     result.add(new int[]{i, j});
         return result;
     }
-    private Map.Entry<Integer, int[]> minimax(int[][] field, boolean isX) {
-        if(gameIsEnded(field)) return new AbstractMap.SimpleEntry<>(evaluateGame(field, isX), null);
-
-        int[] bestMove = new int[2];
-        int bestValue;
-        int symbol;
-
-        if(isX) {
-            bestValue = Integer.MIN_VALUE;
-            symbol = CROSS_CODE;
-        } else {
-            bestValue = Integer.MAX_VALUE;
-            symbol = ZERO_CODE;
-        }
-        for(int[] move : getNothingCells(field)) {
-            int[][] newField = Arrays.stream(field).map(int[]::clone).toArray(int[][]::new);
-
-            newField[move[0]][move[1]] = symbol;
-
-            int hypothetical_value = minimax(newField, !isX).getKey();
-            if(isX && hypothetical_value > bestValue) {
-                bestValue = hypothetical_value;
-                bestMove = new int[]{move[0], move[1]};
-            } 
-            if(!isX && hypothetical_value < bestValue) {
-                bestValue = hypothetical_value;
-                bestMove = new int[]{move[0], move[1]};
-            }
-        }
-        return new AbstractMap.SimpleEntry<>(bestValue, bestMove);
-    }
     public boolean gameIsEnded(int [][] field) {
         return checkGameEnd(field, ZERO_CODE) 
             || checkGameEnd(field, CROSS_CODE) 
             || getNothingCells(field).isEmpty();
-    }
-    private int evaluateGame(int [][] field, boolean isX) {
-        if(checkGameEnd(field, ZERO_CODE)) return isX ? -1 : 1;
-        else if(checkGameEnd(field, CROSS_CODE)) return isX ? 1 : -1;
-        else return 0;
     }
     public CurrentGameAI getAIGameByUUID(UUID uuid) {
         return toDomainMapperAI.datasourceToDomain(repository.getAIGameByUUID(uuid));
